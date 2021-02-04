@@ -46,7 +46,7 @@
             return newArr;
         }
     
-        var colors = ['red','teal','darkorange','darkgreen','hotpink','blue','yellow','violet','maroon','deepskyblue'];
+        var colors = ['red','teal','darkorange','darkgreen','hotpink','blue','gold','violet','maroon','deepskyblue'];
 
         //https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png
         //http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png
