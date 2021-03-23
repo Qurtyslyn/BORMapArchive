@@ -65,7 +65,8 @@
         map = L.map('map', {
             center: [40.643901, -114.131361],
             zoom: 14,
-            layers: [topo]
+            layers: [topo],
+            doubleClickZoom: false
         });
 
         var backgrounds = [
@@ -175,7 +176,7 @@
           
           control.addOverlay(group,files[item].toString().split('.')[0],{groupName: files[item].toString().split(" ")[0]});
           
-          group.addTo(map);
+          //group.addTo(map);
 
           //overlays[(files[item].split('.')[0])] = route;
           //control.addOverlay(group,files[item].toString().split('.')[0],groupName : files[item].toString().split(" ")[0]
