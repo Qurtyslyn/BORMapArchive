@@ -247,7 +247,7 @@
 
         }*/
 
-        L.control.layers.tree(baseTree,overlayTree,).addTo(map);
+        L.control.layers.tree(baseTree,overlayTree).addTo(map);
         //Make Groups
         //for(let i in list)
         //{
