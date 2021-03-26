@@ -21,6 +21,9 @@
     <link rel="stylesheet" href="leaflet.awesome-markers.css">
     <script src="https://kit.fontawesome.com/8064aa9388.js" crossorigin="anonymous"></script>
 
+    <!-- Leaflet Layer Tree Plug in https://github.com/jjimenezshaw/Leaflet.Control.Layers.Tree -->
+    <script src="L.Control.Layers.Tree.js"></script>
+    <link rel="stylesheet" href="L.Control.Layers.Tree.css" />
     <style>
       #map {
         width: 100%;
@@ -46,6 +49,38 @@
             }
             
             return newArr;
+        }
+
+        function newRoute(course, color)
+        {
+            var route = new L.GPX(course, {
+                async: true,
+                polyline_options: {
+                    color: color,
+                    opacity: 0.75,
+                    weight: 5,
+                    lineCap: 'round'
+                },
+                marker_options: {
+                    iconSize: [25,25],
+                    startIconUrl: '',
+                    endIconUrl: '',
+                    shadowUrl: '',
+                    wptIconUrls: {
+                        'Checkpoint': 'Icons/' + color + '-checkpoint.png',
+                        'Recovery': 'Icons/' + color + '-recovery.png',
+                        'RoadCrossing': 'Icons/' + color + '-roadcrossing.png',
+                        'StartFinish': 'Icons/' + color + '-startfinish.png',
+                        'Radio': 'Icons/' + color + '-radio.png',
+                        'Pits': 'Icons/' + color + '-pits.png',
+                        'Monitor': 'Icons/' + color + '-monitor.png',
+                        '': 'Icons/' + color + '.png'
+                    }
+                },
+                
+            });
+
+            return route;
         }
     
         var colors = ['red','teal','darkorange','darkgreen','hotpink','blue','gold','violet','maroon','deepskyblue'];
@@ -96,34 +131,140 @@
         
         // Get unique locations for races
         var locations = [];
+        var organizations = [];
         
         for(let index in files)
         {
-            locations.push((files[index].toString().split(' '))[0]);
+            var nameArray = files[index].toString().split('-');
+            
+            locations.push(nameArray[1]);
+            organizations.push(nameArray[0]);
+            //locations.push((files[index].toString().split(' '))[0]);
         }
         
         //locations = locations.unique();
         
         var list = getUniqueValues(locations);
-        
-        
-        //Make Groups
-        for(let i in list)
+        var orgs = getUniqueValues(organizations);
+
+        var baseTree = {label: 'Base Layers',
+            children: [
+                {
+                    label: 'Topographic',
+                    layer: topo
+                },
+                {
+                    label: 'Basic',
+                    layer: streets
+                }
+            ]
+        };
+        var overlayTree = {label: 'Overlay Layers', children: []};
+
+        for(let i in orgs)
         {
-            this[list[i]] = new L.LayerGroup();
+            overlayTree.children.push({label: orgs[i], selectAllCheckbox: true, children: []});
         }
+
+        var colorCount = 0;
+        for(let i in files.sort())
+        {
+            var nameArray = files[i].toString().split('-');
+            var name = files[i].toString().split('-')[1] + " " + files[i].toString().split('-')[2];
+
+            if(colorCount == colors.length)
+            {
+                colorCount = 0;
+            }
+            var course = 'Maps/' + files[i];
+
+            var group = new L.LayerGroup();
+
+            newRoute(course,colors[colorCount]).on('loaded', function(e) {
+                    map.fitBounds(e.target.getBounds());
+            }).addTo(group);
+            
+            //Add the Locations to the Tree under the Orgs
+            for(let j in overlayTree.children)
+            {
+                if(overlayTree.children[j].label == nameArray[0])
+                {
+                    //If there are no children, add the location and map
+                    if(overlayTree.children[j].children.length == 0)
+                    {
+                        overlayTree.children[j].children.push({label: nameArray[1], selectAllCheckbox: true, children: []});
+                        overlayTree.children[j].children[0].children.push({label: name, layer: group});
+                    }//If there are locations, and it matches the last one, add the map.
+                    else if (overlayTree.children[j].children[overlayTree.children[j].children.length-1].label == nameArray[1])
+                    {
+                        overlayTree.children[j].children[overlayTree.children[j].children.length-1].children.push({label: name, layer: group});
+                    }//If it doesn't match any locations, add the location and the map.
+                    else
+                    {
+                        overlayTree.children[j].children.push({label: nameArray[1], selectAllCheckbox: true, children: []});
+                        overlayTree.children[j].children[overlayTree.children[j].children.length-1].children.push({label: name, layer: group});
+                    }
+                }
+            }
+
+            colorCount++;
+
+
+        }
+
+
+        /*var colorCount = 0;
+        for(let item in files.sort())
+        {
+            if(colorCount == colors.length)
+            {
+                colorCount = 0;
+            }
+            var course = 'Maps/' + files[item];
+
+            var group = new L.LayerGroup();
+
+            newRoute(course,colors[colorCount]).on('loaded', function(e) {
+                    map.fitBounds(e.target.getBounds());
+            }).addTo(group);
+
+            var name = files[item].toString().split('-')[1] + " " + files[item].toString().split('-')[2];
+
+            var org = files[item].toString().split('-')[0];
+            var location = files[item].toString().split('-')[1];
+
+            for(let i in overlayTree.children)
+            {
+                
+                if(overlayTree.children[i].label == org)
+                {
+                
+
+
+                    //overlayTree.children[i].children.push({label: name, layer: group});
+                }
+            }
+
+        }*/
+
+        L.control.layers.tree(baseTree,overlayTree,).addTo(map);
+        //Make Groups
+        //for(let i in list)
+        //{
+        //    this[list[i]] = new L.LayerGroup();
+        //}
             
             
         var overlays = [];    
-        for(let index in list)
-        {
-            overlays.push({
-                groupName : list[index],
-                expanded: true, 
-                layers: {}
+        //for(let index in orgs)
+        //{
+        //    overlays.push({
+        //        groupName : orgs[index],
+        //        expanded: true, 
+        //        layers: {}
                 
-            });
-        }
+        //    });
+        //}
         
         var options = {
             collapsed : false,
@@ -131,9 +272,13 @@
         }
         
         //var control = L.Control.styledLayerControl(backgrounds,overlays,options);
-        var control = L.Control.styledLayerControl(backgrounds,overlays,options);
+        /*var control = L.Control.styledLayerControl(backgrounds,overlays,options);
 
-        
+        for(let i in orgs)
+        {
+            var group = new L.LayerGroup();
+            control.addOverlay(group,orgs[i],{groupName: orgs[i]});
+        }
 
         //Adding GPX Routes to the Map
         //https://github.com/mpetazzoni/leaflet-gpx
@@ -143,40 +288,16 @@
             {
                 colorCount = 0;
             }
-          var course = 'Maps/' + files[item];
+            var course = 'Maps/' + files[item];
           
             var group = new L.LayerGroup();
 
-            var route = new L.GPX(course, {
-                async: true,
-                polyline_options: {
-                    color: colors[colorCount],
-                    opacity: 0.75,
-                    weight: 5,
-                    lineCap: 'round'
-                },
-                marker_options: {
-                    iconSize: [25,25],
-                    startIconUrl: '',
-                    endIconUrl: '',
-                    shadowUrl: '',
-                    wptIconUrls: {
-                        'Checkpoint': 'Icons/' + colors[colorCount] + '-checkpoint.png',
-                        'Recovery': 'Icons/' + colors[colorCount] + '-recovery.png',
-                        'RoadCrossing': 'Icons/' + colors[colorCount] + '-roadcrossing.png',
-                        'StartFinish': 'Icons/' + colors[colorCount] + '-startfinish.png',
-                        'Radio': 'Icons/' + colors[colorCount] + '-radio.png',
-                        'Pits': 'Icons/' + colors[colorCount] + '-pits.png',
-                        'Monitor': 'Icons/' + colors[colorCount] + '-monitor.png',
-                        '': 'Icons/' + colors[colorCount] + '.png'
-                    }
-                },
-                
-            }).on('loaded', function(e) {
+            newRoute(course,colors[colorCount]).on('loaded', function(e) {
                     map.fitBounds(e.target.getBounds());
-          }).addTo(group);
+            }).addTo(group);
           
-          control.addOverlay(group,files[item].toString().split('.')[0],{groupName: files[item].toString().split(" ")[0]});
+          var name = files[item].toString().split('-')[1] + " " + files[item].toString().split('-')[2];
+          control.addOverlay(group,name.split(".")[0],{groupName: name.split(".")[0]});
           
           //group.addTo(map);
 
@@ -189,7 +310,7 @@
 
         //var control = L.Control.styledLayerControl(backgrounds,overlays, {collapsed : false}).addTo(map);
         
-        map.addControl(control);
+        map.addControl(control);*/
 
         function resizeMapWithWindowChange()
         {
