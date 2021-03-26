@@ -32,6 +32,8 @@
     <div id="map"></div>
     <script type="text/javascript">
 
+        document.getElementById("map").style.height = (window.innerHeight - 20) + "px";
+
         function getUniqueValues(arr)
         {
             var newArr = [];
@@ -188,6 +190,14 @@
         //var control = L.Control.styledLayerControl(backgrounds,overlays, {collapsed : false}).addTo(map);
         
         map.addControl(control);
+
+        function resizeMapWithWindowChange()
+        {
+            document.getElementById("map").style.height = (window.innerHeight - 20) + "px";
+            map.invalidateSize();
+        }
+        
+        window.addEventListener("resize", resizeMapWithWindowChange);
 
         //L.easyButton('<img alt="Wendover" src="Icons/Wendover.png"/>',function//(btn,map){
         //    map.setView(['40.645','-114.127753']);
