@@ -29,6 +29,14 @@
         width: 100%;
         height: 960px;
       }
+
+      .leaflet-layerstree-header label {
+        padding-left: 10px;
+      }
+
+      .leaflet-control-layers .leaflet-control-layers-list {
+          width: 215px;
+      }
     </style>
   </head>
   <body>
@@ -193,16 +201,16 @@
                     if(overlayTree.children[j].children.length == 0)
                     {
                         overlayTree.children[j].children.push({label: nameArray[1], selectAllCheckbox: true, children: []});
-                        overlayTree.children[j].children[0].children.push({label: name, layer: group});
+                        overlayTree.children[j].children[0].children.push({label: name.split(".")[0], layer: group});
                     }//If there are locations, and it matches the last one, add the map.
                     else if (overlayTree.children[j].children[overlayTree.children[j].children.length-1].label == nameArray[1])
                     {
-                        overlayTree.children[j].children[overlayTree.children[j].children.length-1].children.push({label: name, layer: group});
+                        overlayTree.children[j].children[overlayTree.children[j].children.length-1].children.push({label: name.split(".")[0], layer: group});
                     }//If it doesn't match any locations, add the location and the map.
                     else
                     {
                         overlayTree.children[j].children.push({label: nameArray[1], selectAllCheckbox: true, children: []});
-                        overlayTree.children[j].children[overlayTree.children[j].children.length-1].children.push({label: name, layer: group});
+                        overlayTree.children[j].children[overlayTree.children[j].children.length-1].children.push({label: name.split(".")[0], layer: group});
                     }
                 }
             }
@@ -247,7 +255,8 @@
 
         }*/
 
-        L.control.layers.tree(baseTree,overlayTree).addTo(map);
+        var controls = L.control.layers.tree(baseTree,overlayTree).addTo(map);
+        controls.collapseTree(true);
         //Make Groups
         //for(let i in list)
         //{
