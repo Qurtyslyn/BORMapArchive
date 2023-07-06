@@ -29,14 +29,6 @@
         width: 100%;
         height: 960px;
       }
-
-      .leaflet-layerstree-header label {
-        padding-left: 10px;
-      }
-
-      .leaflet-control-layers .leaflet-control-layers-list {
-          width: 215px;
-      }
     </style>
   </head>
   <body>
@@ -45,6 +37,7 @@
 
         document.getElementById("map").style.height = (window.innerHeight - 20) + "px";
 
+        //Get the unique values in an Array and return an Array of only those values
         function getUniqueValues(arr)
         {
             var newArr = [];
@@ -59,6 +52,7 @@
             return newArr;
         }
 
+        //Creat a new Route for display based on a GPX file
         function newRoute(course, color)
         {
             var route = new L.GPX(course, {
@@ -91,22 +85,24 @@
             return route;
         }
     
+        //Colors to rotate through for routes
         var colors = ['red','teal','darkorange','darkgreen','hotpink','blue','gold','violet','maroon','deepskyblue'];
 
-        //https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png
-        //http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png
+        //Create the Topo layer of the Map
         var topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
             attribution: 'Map Data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> | Map Display: &copy; <a href="http://opentopomap.org/"> OpenTopoMap </a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)',
             maxZoom: 18,
             subdomains: ['a','b','c']
         });
 
+        //Create the Streets layer of the Map
         var streets = L.tileLayer( 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
             maxZoom: 18,
             subdomains: ['a','b','c']
         });
 
+        //Create the Map, Centered south of Wendover, UT
         map = L.map('map', {
             center: [40.643901, -114.131361],
             zoom: 14,
@@ -114,6 +110,7 @@
             doubleClickZoom: false
         });
 
+        //Create Background Options for the Map Menu
         var backgrounds = [
             {
                 groupName : "Background Map",
@@ -125,6 +122,7 @@
           }
           ];
 
+        //Create an array of Files that are currently in the Maps Directory
         var files = [        <?php
             if($dh = opendir("Maps/")){
               while (($file = readdir($dh)) !== false){
@@ -143,15 +141,15 @@
         
         for(let index in files)
         {
+            //Name format for files is Organization Abbreviations-Race Name-Year.GPX
             var nameArray = files[index].toString().split('-');
             
             locations.push(nameArray[1]);
             organizations.push(nameArray[0]);
-            //locations.push((files[index].toString().split(' '))[0]);
+            
         }
         
-        //locations = locations.unique();
-        
+        //Get Unique values for Locations and Organizations for Menu
         var list = getUniqueValues(locations);
         var orgs = getUniqueValues(organizations);
 
@@ -168,12 +166,14 @@
             ]
         };
         var overlayTree = {label: 'Overlay Layers', children: []};
-
+        
+        //Add organizations to Menu
         for(let i in orgs)
         {
             overlayTree.children.push({label: orgs[i], selectAllCheckbox: true, children: []});
         }
 
+        //Add race maps to Menu
         var colorCount = 0;
         for(let i in files.sort())
         {
@@ -197,20 +197,19 @@
             {
                 if(overlayTree.children[j].label == nameArray[0])
                 {
-                    //If there are no children, add the location and map
                     if(overlayTree.children[j].children.length == 0)
                     {
                         overlayTree.children[j].children.push({label: nameArray[1], selectAllCheckbox: true, children: []});
-                        overlayTree.children[j].children[0].children.push({label: name.split(".")[0], layer: group});
-                    }//If there are locations, and it matches the last one, add the map.
+                        overlayTree.children[j].children[0].children.push({label: name, layer: group});
+                    }
                     else if (overlayTree.children[j].children[overlayTree.children[j].children.length-1].label == nameArray[1])
                     {
-                        overlayTree.children[j].children[overlayTree.children[j].children.length-1].children.push({label: name.split(".")[0], layer: group});
-                    }//If it doesn't match any locations, add the location and the map.
+                        overlayTree.children[j].children[overlayTree.children[j].children.length-1].children.push({label: name, layer: group});
+                    }
                     else
                     {
                         overlayTree.children[j].children.push({label: nameArray[1], selectAllCheckbox: true, children: []});
-                        overlayTree.children[j].children[overlayTree.children[j].children.length-1].children.push({label: name.split(".")[0], layer: group});
+                        overlayTree.children[j].children[overlayTree.children[j].children.length-1].children.push({label: name, layer: group});
                     }
                 }
             }
@@ -220,107 +219,17 @@
 
         }
 
-
-        /*var colorCount = 0;
-        for(let item in files.sort())
-        {
-            if(colorCount == colors.length)
-            {
-                colorCount = 0;
-            }
-            var course = 'Maps/' + files[item];
-
-            var group = new L.LayerGroup();
-
-            newRoute(course,colors[colorCount]).on('loaded', function(e) {
-                    map.fitBounds(e.target.getBounds());
-            }).addTo(group);
-
-            var name = files[item].toString().split('-')[1] + " " + files[item].toString().split('-')[2];
-
-            var org = files[item].toString().split('-')[0];
-            var location = files[item].toString().split('-')[1];
-
-            for(let i in overlayTree.children)
-            {
-                
-                if(overlayTree.children[i].label == org)
-                {
-                
-
-
-                    //overlayTree.children[i].children.push({label: name, layer: group});
-                }
-            }
-
-        }*/
-
-        var controls = L.control.layers.tree(baseTree,overlayTree).addTo(map);
-        controls.collapseTree(true);
-        //Make Groups
-        //for(let i in list)
-        //{
-        //    this[list[i]] = new L.LayerGroup();
-        //}
-            
+        //Add Layer to Map
+        L.control.layers.tree(baseTree,overlayTree,{selectorBack: true}).addTo(map);
             
         var overlays = [];    
-        //for(let index in orgs)
-        //{
-        //    overlays.push({
-        //        groupName : orgs[index],
-        //        expanded: true, 
-        //        layers: {}
-                
-        //    });
-        //}
-        
+
         var options = {
             collapsed : false,
             group_maxHeight: "500px"
         }
-        
-        //var control = L.Control.styledLayerControl(backgrounds,overlays,options);
-        /*var control = L.Control.styledLayerControl(backgrounds,overlays,options);
 
-        for(let i in orgs)
-        {
-            var group = new L.LayerGroup();
-            control.addOverlay(group,orgs[i],{groupName: orgs[i]});
-        }
-
-        //Adding GPX Routes to the Map
-        //https://github.com/mpetazzoni/leaflet-gpx
-        var colorCount = 0;
-        for(let item in files.sort()) {
-            if(colorCount == colors.length)
-            {
-                colorCount = 0;
-            }
-            var course = 'Maps/' + files[item];
-          
-            var group = new L.LayerGroup();
-
-            newRoute(course,colors[colorCount]).on('loaded', function(e) {
-                    map.fitBounds(e.target.getBounds());
-            }).addTo(group);
-          
-          var name = files[item].toString().split('-')[1] + " " + files[item].toString().split('-')[2];
-          control.addOverlay(group,name.split(".")[0],{groupName: name.split(".")[0]});
-          
-          //group.addTo(map);
-
-          //overlays[(files[item].split('.')[0])] = route;
-          //control.addOverlay(group,files[item].toString().split('.')[0],groupName : files[item].toString().split(" ")[0]
-            //);
-          
-          colorCount++;
-        }
-
-        //var control = L.Control.styledLayerControl(backgrounds,overlays, {collapsed : false}).addTo(map);
-        
-        map.addControl(control);*/
-
+        //Resize the Map to fit the current window size
         function resizeMapWithWindowChange()
         {
             document.getElementById("map").style.height = (window.innerHeight - 20) + "px";
@@ -328,19 +237,6 @@
         }
         
         window.addEventListener("resize", resizeMapWithWindowChange);
-
-        //L.easyButton('<img alt="Wendover" src="Icons/Wendover.png"/>',function//(btn,map){
-        //    map.setView(['40.645','-114.127753']);
-        //},'Wendover').addTo(map);
-
-        //var buttons = [
-         // L.easyButton('<img alt="Wendover" src="Icons/Wendover.png"/>',function//(btn,map){map.setView(['40.645','-114.127753']);},'Wendover'),
-        //  L.easyButton('<img alt="Wendover" src="Icons/Wendover.png"/>',function//(btn,map){map.setView(['40.645','-114.127753']);},'Wendover')
-        //];
-
-        //L.easyBar(buttons).addTo(map);
-        //map.removeLayer(marker);
-
 
     </script>
   </body>
