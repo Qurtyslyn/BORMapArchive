@@ -123,43 +123,16 @@
           ];
 
         //Create an array of Files that are currently in the Maps Directory
-        var files = ["Delle 1990 (1).gpx",
-                        "Jackpot 2011.gpx",
-                        "Jackpot 2014 (1).gpx",
-                        "Jackpot 2016.gpx",
-                        "Jackpot 2017.gpx",
-                        "Jackpot 2018 (1).gpx",
-                        "Jackpot 2019.gpx",
-                        "Jackpot 2020.gpx",
-                        "Knolls 2017 (1).gpx",
-                        "Knolls 2019.gpx",
-                        "Knolls 2020.gpx",
-                        "Vernal 2015 (1).gpx",
-                        "Vernal 2016 Fall.gpx",
-                        "Vernal 2016 Spring.gpx",
-                        "Vernal 2017 (1).gpx",
-                        "Vernal 2018 (1).gpx",
-                        "Vernal 2019 (1).gpx",
-                        "Wendover 2001 Fall (1).gpx",
-                        "Wendover 2001 Spring (1).gpx",
-                        "Wendover 2002 (1).gpx",
-                        "Wendover 2003 (1).gpx",
-                        "Wendover 2004 (1).gpx",
-                        "Wendover 2005 (1).gpx",
-                        "Wendover 2006 (1).gpx",
-                        "Wendover 2007 Fall (1).gpx",
-                        "Wendover 2007 Spring (1).gpx",
-                        "Wendover 2008 Fall.gpx",
-                        "Wendover 2008 Spring (1).gpx",
-                        "Wendover 2009 Fall (1).gpx",
-                        "Wendover 2009 Spring (1).gpx",
-                        "Wendover 2010 (1).gpx",
-                        "Wendover 2011.gpx",
-                        "Wendover 2013 Fall (1).gpx",
-                        "Wendover 2014 Fall.gpx",
-                        "Wendover 2014 Spring.gpx",
-                        "Wendover 2018.gpx",
-                        "Wendover 2019.gpx"];
+        /*var files = [        <?php
+            if($dh = opendir("Maps/")){
+              while (($file = readdir($dh)) !== false){
+                if ($file == '.' or $file == '..') continue;
+                echo '"' . $file . '",';
+              }
+              closedir($dh);
+            }
+
+        ?>];*/
         
         
         // Get unique locations for races
